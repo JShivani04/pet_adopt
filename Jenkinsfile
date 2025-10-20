@@ -3,15 +3,15 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = "shivanij454/pet-adoption-portal:latest"
-        KUBE_DEPLOYMENT = "pet-adoption-deployment"
         DOCKER_USERNAME = "shivanij454"
-        DOCKER_PASSWORD = "Logan@2020" // exposed in Jenkinsfile
+        DOCKER_PASSWORD = "Logan@2020"  // For testing only; use Jenkins credentials in production
+        KUBE_DEPLOYMENT = "pet-adoption-deployment"
     }
 
     stages {
         stage('Checkout Code') {
             steps {
-                git 'https://github.com/shivanij454/pet-adoption-portal.git'
+                git branch: 'main', url: 'https://github.com/shivanij454/pet-adoption-portal.git'
             }
         }
 
@@ -26,7 +26,6 @@ pipeline {
         stage('Push to Docker Hub') {
             steps {
                 script {
-                    // Login to Docker Hub using username/password
                     sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
                     sh 'docker push $DOCKER_IMAGE'
                 }
@@ -49,10 +48,10 @@ pipeline {
 
     post {
         success {
-            echo '✅ Deployment successful!'
+            echo '✅ CI/CD pipeline successful! Docker image built, pushed, and deployed to Kubernetes.'
         }
         failure {
-            echo '❌ Build or deployment failed.'
+            echo '❌ Pipeline failed. Check logs for errors.'
         }
     }
 }
