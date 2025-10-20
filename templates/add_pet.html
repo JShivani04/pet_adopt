@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Pet</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Add New Pet for Adoption</h1>
+    <form method="POST">
+        <label>Name:</label><br>
+        <input type="text" name="name" required><br>
+
+        <label>Type:</label><br>
+        <input type="text" name="type" required><br>
+
+        <label>Age:</label><br>
+        <input type="text" name="age" required><br>
+
+        <label>Description:</label><br>
+        <textarea name="description" required></textarea><br>
+
+        <button type="submit">Add Pet</button>
+    </form>
+    <br>
+    <a href="{{ url_for('home') }}">← Back to Home</a>
+</body>
+</html>

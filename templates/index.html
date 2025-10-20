@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pet Adoption Portal</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>🐾 Pet Adoption Portal</h1>
+    <a href="{{ url_for('add_pet') }}" class="btn">➕ Add New Pet</a>
+    <hr>
+
+    {% if pets %}
+        {% for pet in pets %}
+        <div class="card">
+            <h2>{{ pet.name }} ({{ pet.type }})</h2>
+            <p>Age: {{ pet.age }}</p>
+            <p>{{ pet.description }}</p>
+            <a href="{{ url_for('adopt_pet', pet_id=pet.id) }}" class="adopt-btn">Adopt Now</a>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>No pets available for adoption right now.</p>
+    {% endif %}
+</body>
+</html>
