@@ -2,53 +2,58 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "shivanij454/pet_adoption_app:latest"
+        // 🔧 Replace with your actual Docker Hub username
+        DOCKER_HUB_USER = 'shivanij454'
+        IMAGE_NAME = 'pet_adoption_app'
     }
 
     stages {
+
         stage('Checkout Code') {
             steps {
-                // Clone public repo using HTTPS (no credentials needed)
-                git branch: 'master', url: 'https://github.com/JShivani04/pet_adopt.git'
+                echo '📥 Checking out code from GitHub...'
+                git 'https://github.com/JShivani04/pet_adopt.git'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                script {
-                    // Build Docker image
-                    sh 'docker build -t $DOCKER_IMAGE .'
-                }
+                echo '🐳 Building Docker image...'
+                bat "docker build -t %DOCKER_HUB_USER%/%IMAGE_NAME%:latest ."
+            }
+        }
+
+        stage('Login to Docker Hub') {
+            steps {
+                echo '🔑 Logging into Docker Hub...'
+                // ⚠️ Replace 'Logan@2020' with your Docker Hub password
+                bat "echo Logan@2020 | docker login -u %DOCKER_HUB_USER% --password-stdin"
             }
         }
 
         stage('Push to Docker Hub') {
             steps {
-                script {
-                    // Log in to Docker using username & password directly
-                    // ⚠️ Only if you’re okay hardcoding temporarily (not secure for production)
-                    sh 'echo "Logan@2020" | docker login -u "shivanij454" --password-stdin'
-                    sh 'docker push $DOCKER_IMAGE'
-                }
+                echo '📤 Pushing Docker image to Docker Hub...'
+                bat "docker push %DOCKER_HUB_USER%/%IMAGE_NAME%:latest"
             }
         }
 
-        stage('Run Container') {
+        stage('Deploy Container') {
             steps {
-                script {
-                    // Run the app container locally
-                    sh 'docker run -d -p 8080:80 $DOCKER_IMAGE'
-                }
+                echo '🚀 Running Docker container...'
+                bat "docker stop petapp-container || exit 0"
+                bat "docker rm petapp-container || exit 0"
+                bat "docker run -d -p 5000:5000 --name petapp-container %DOCKER_HUB_USER%/%IMAGE_NAME%:latest"
             }
         }
     }
 
     post {
         success {
-            echo '✅ Application built and running successfully!'
+            echo '✅ Build and Deployment Successful!'
         }
         failure {
-            echo '❌ Pipeline failed.'
+            echo '❌ Pipeline Failed. Check logs for errors.'
         }
     }
 }
