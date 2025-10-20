@@ -2,22 +2,21 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "shivanij454/pet-adoption-portal:latest"
-        DOCKER_USERNAME = "shivanij454"
-        DOCKER_PASSWORD = "Logan@2020"  // For testing only; use Jenkins credentials in production
-        KUBE_DEPLOYMENT = "pet-adoption-deployment"
+        DOCKER_IMAGE = "shivanij454/pet_adoption_app:latest"
     }
 
     stages {
         stage('Checkout Code') {
             steps {
-                git branch: 'main', url: 'https://github.com/shivanij454/pet-adoption-portal.git'
+                // Clone public repo using HTTPS (no credentials needed)
+                git branch: 'master', url: 'https://github.com/JShivani04/pet_adopt.git'
             }
         }
 
         stage('Build Docker Image') {
             steps {
                 script {
+                    // Build Docker image
                     sh 'docker build -t $DOCKER_IMAGE .'
                 }
             }
@@ -26,21 +25,19 @@ pipeline {
         stage('Push to Docker Hub') {
             steps {
                 script {
-                    sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
+                    // Log in to Docker using username & password directly
+                    // ⚠️ Only if you’re okay hardcoding temporarily (not secure for production)
+                    sh 'echo "Logan@2020" | docker login -u "shivanij454" --password-stdin'
                     sh 'docker push $DOCKER_IMAGE'
                 }
             }
         }
 
-        stage('Deploy to Kubernetes') {
+        stage('Run Container') {
             steps {
                 script {
-                    // Apply deployment and service YAML files from project root
-                    sh 'kubectl apply -f deployment.yaml'
-                    sh 'kubectl apply -f service.yaml'
-                    
-                    // Wait for rollout to complete
-                    sh "kubectl rollout status deployment/$KUBE_DEPLOYMENT"
+                    // Run the app container locally
+                    sh 'docker run -d -p 8080:80 $DOCKER_IMAGE'
                 }
             }
         }
@@ -48,10 +45,10 @@ pipeline {
 
     post {
         success {
-            echo '✅ CI/CD pipeline successful! Docker image built, pushed, and deployed to Kubernetes.'
+            echo '✅ Application built and running successfully!'
         }
         failure {
-            echo '❌ Pipeline failed. Check logs for errors.'
+            echo '❌ Pipeline failed.'
         }
     }
 }
